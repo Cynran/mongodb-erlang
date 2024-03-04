@@ -76,7 +76,7 @@ scram_second_step(Socket, Database, Login, Password, Payload, ConversationId, Ra
   Decoded = base64:decode(Payload),
   {Signature, ClientFinalMessage} = compose_second_message(Decoded, Login, Password, RandomBString, FirstMessage),
   SASLContinue = {<<"saslContinue">>, 1, <<"conversationId">>, ConversationId, <<"payload">>, base64:encode(ClientFinalMessage)},
-  case mc_worker_api:sync_command(Socket, Database, SASLContinue, SetOpts) of
+  case mc_worker_api:sync_command(Socket, Database, SASLContinue, SetOpts, false) of
     {true, Res} ->
       scram_third_step(base64:encode(Signature), Res, ConversationId, Socket, Database, SetOpts);
     {false, Details} ->
@@ -95,7 +95,7 @@ scram_third_step(ServerSignature, Response, ConversationId, Socket, Database, Se
 scram_forth_step(true, _, _, _, _) -> ok;
 scram_forth_step(false, ConversationId, Socket, Database, SetOpts) ->
   SASLContinue = {<<"saslContinue">>, 1, <<"conversationId">>, ConversationId, <<"payload">>, <<>>},
-  case mc_worker_api:sync_command(Socket, Database, SASLContinue, SetOpts) of
+  case mc_worker_api:sync_command(Socket, Database, SASLContinue, SetOpts, false) of
       {true, #{<<"done">> := true}} ->
         ok;
       {true, Res} ->
