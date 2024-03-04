@@ -62,7 +62,7 @@ scram_first_step(Socket, Database, Login, Password, SetOpts) ->
   FirstMessage = compose_first_message(Login, RandomBString),
   Message = base64:encode(<<?GS2_HEADER/binary, FirstMessage/binary>>),
   SASLStart = {<<"saslStart">>, 1, <<"mechanism">>, <<"SCRAM-SHA-1">>, <<"autoAuthorize">>, 1, <<"payload">>, Message},
-  case mc_worker_api:sync_command(Socket, Database, SASLStart, SetOpts) of
+  case mc_worker_api:sync_command(Socket, Database, SASLStart, SetOpts, false) of
       {true, Res} ->
         ConversationId = maps:get(<<"conversationId">>, Res, {}),
         Payload = maps:get(<<"payload">>, Res),
